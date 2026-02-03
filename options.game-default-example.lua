@@ -40,43 +40,43 @@ local options = {
     -- Medium Fluid & Soil Canister
     ResourceCanister_Reusable_T2_C = {
         Capacity = 24,
-        ItemTransferRate = 50
+        ItemTransferRate = 1
     },
 
     -- Medium Resource Canister
     MediumResourceCanister_BP_C = {
         Capacity = 32,
-        ItemTransferRate = 50
+        ItemTransferRate = 1
     },
 
     -- Medium Gas Canister
     MediumGasCanister_BP_C = {
         Capacity = 160,
-        ItemTransferRate = 50
+        ItemTransferRate = 5
     },
 
     -- Large Fluid & Soil Canister
     ResourceCanister_Reusable_T3_C = {
         Capacity = 300,
-        ItemTransferRate = 50
+        ItemTransferRate = 1
     },
 
     -- Large Resource Canister
     LargeResourceCanister_BP_C = {
         Capacity = 400,
-        ItemTransferRate = 50
+        ItemTransferRate = 1
     },
 
     -- Large Gas Canister
     LargeGasCanister_BP_C = {
         Capacity = 2000,
-        ItemTransferRate = 50
+        ItemTransferRate = 5
     },
 
     -- Extra Large Resource Canister
     ExtraLargeResourceCanister_BP_C = {
         Capacity = 2000,
-        ItemTransferRate = 50
+        ItemTransferRate = 3
     },
 
     -- Oxygen Tank
