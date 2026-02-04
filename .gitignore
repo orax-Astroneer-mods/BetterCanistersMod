@@ -1,3 +1,10 @@
+/.PERSO
+/.RELEASE
+/.TEST
+/.TEMP
+
+/options.lua
+
 # Compiled Lua sources
 luac.out
 
