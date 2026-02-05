@@ -1,4 +1,4 @@
-/.PERSO
+/.LOCAL
 /.RELEASE
 /.TEST
 /.TEMP
@@ -6,3 +6,6 @@
 /options.lua
 
 .vscode
+
+.secrets
+.env

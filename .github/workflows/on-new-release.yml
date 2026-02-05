@@ -1,0 +1,43 @@
+name: On new release
+
+env:
+  DOTNET_VERSION: 7.x
+  
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      isDraft:
+        type: boolean
+        default: true
+        description: 'Create a draft'
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  main-job:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Show release info
+      run: |
+        Write-Host "Release tag: ${{ github.event.release.tag_name }}"
+        Write-Host "Release name: ${{ github.event.release.name }}"
+        Write-Host "Ref name: ${{ github.ref_name }}"
+        Write-Host "Is draft: ${{ github.event.release.draft }}"
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set environment variables
+      run: .\ci\set-vars.ps1 -github_ref_name '${{ github.ref_name }}' -github_repository $env:GITHUB_REPOSITORY
+
+    - name: Create index.json metadata
+      run: |
+        .\ci\create-index-metadata.ps1

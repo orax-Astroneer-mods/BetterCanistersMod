@@ -1,3 +1,0 @@
-.gitignore
-create-release.ps1
-release-exclude-files.txt
