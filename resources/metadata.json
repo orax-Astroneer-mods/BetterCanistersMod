@@ -1,0 +1,9 @@
+{
+    "schema_version": 2,
+    "name": "{ModNameWithSpaces}",
+    "mod_id": "{ModId}",
+    "author": "orax",
+    "version": "{Version}",
+    "sync": "client",
+    "enable_ue4ss": "true"
+}
