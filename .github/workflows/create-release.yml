@@ -31,7 +31,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Checkout lua-mods-libs
-      uses: actions/checkout@v4 
+      uses: actions/checkout@v4
 
     - name: Set environment variables
       run: |
@@ -42,44 +42,26 @@ jobs:
         "VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
         "RELEASE_FILENAME=$releaseFilename" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-    - name: Copy files
+    - name: Run scripts and export variables
       run: |
-        dir
-        $name = '${{ env.NAME }}'
-        $releaseDir = '${{ env.RELEASE_DIR }}'
-        $version = '${{ env.VERSION }}'
-        $targetDir = "$releaseDir\$name"
-        New-Item -Path . -Name $targetDir -ItemType 'directory'
-        dir
-        dir "$targetDir"
-        Move-Item -Path 'Scripts' -Destination "$targetDir"
-        dir "$targetDir"
-        New-Item -Path . -Name "$targetDir\enabled.txt" -ItemType 'file'
-        New-Item -Path "$targetDir" -Name "version.txt" -ItemType "file" -Value $version
-        Move-Item -Path @('options.example.lua', 'options.*-example.lua') -Destination "$targetDir"
-
-    - name: Create ZIP archive
-      run: |
-        $name = '${{ env.NAME }}'
-        $releaseDir = '${{ env.RELEASE_DIR }}'
-        $releaseFilename = '${{ env.RELEASE_FILENAME }}'
-        Compress-Archive -Path "$releaseDir\$name" -DestinationPath "$releaseDir\$releaseFilename"
-
-    - name: Hash file
-      run: |
-        $hash = (Get-FileHash -Algorithm ('${{ env.HASH_ALGORITHM }}' -replace '-','') `
-          -Path ${{ env.RELEASE_DIR }}\${{ env.RELEASE_FILENAME }}).Hash
-        "HASH=$hash" | Out-File -FilePath $env:GITHUB_ENV -Append
+        $vars = & ".\create-release.ps1"
+        $vars | ForEach-Object {
+            $_.GetEnumerator() | ForEach-Object {
+                "$($_.Key)=$($_.Value)" | Out-File -FilePath $env:GITHUB_ENV -Append
+            }
+        }
+        create-index-metadata.ps1
 
     - name: GH Release
       uses: softprops/action-gh-release@v2.0.4
       with:
         files: |
-          ${{ env.RELEASE_DIR }}/${{ env.RELEASE_FILENAME }}
+          $ReleaseDir\$ReleaseFilename
+          $ReleaseDir\$ReleasePakFilename
         draft: ${{ inputs.isDraft == true && true || false }}
         append_body: true
         body: |
           ```
-          VERSION: ${{ env.VERSION }}
-          SHA-256: ${{ env.HASH }}
+          VERSION: $version
+          SHA-256: $hash
           ```

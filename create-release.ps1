@@ -151,10 +151,10 @@ Write-Host "SHA-256: $HashPakFile"
 # Export variables for GitHub Actions
 #
 
-if ($env:GITHUB_REF_NAME) {
-    "VERSION=$Version" | Out-File -FilePath $env:GITHUB_ENV -Append
-    "RELEASE_FILENAME=$ReleaseFilename" | Out-File -FilePath $env:GITHUB_ENV -Append
-    "HASH=$Hash" | Out-File -FilePath $env:GITHUB_ENV -Append
-    "RELEASE_PAK_FILENAME=$ReleasePakFilename" | Out-File -FilePath $env:GITHUB_ENV -Append
-    "HASH_PAK_FILE=$HashPakFile" | Out-File -FilePath $env:GITHUB_ENV -Append
+return @{
+    VERSION              = $Version
+    RELEASE_FILENAME     = $ReleaseFilename
+    RELEASE_PAK_FILENAME = $ReleasePakFilename
+    HASH                 = $Hash
+    HASH_PAK_FILE        = $HashPakFile
 }

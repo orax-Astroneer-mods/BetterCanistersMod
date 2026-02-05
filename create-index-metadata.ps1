@@ -1,8 +1,8 @@
 param(
-    [string]$RepoOwner,
-    [string]$RepoName
+    [string]$RepoOwner
 )
 
+$RepoName = Split-Path -Path (Get-Location) -Leaf
 $ResourcesDir = "resources"
 $TempDir = ".TEMP"
 $TagsPath = Join-Path $TempDir "tags.json"
