@@ -1,4 +1,4 @@
-name: On new release
+name: Create index.json on new release
 
 env:
   DOTNET_VERSION: 7.x

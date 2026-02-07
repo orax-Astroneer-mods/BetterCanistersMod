@@ -11,8 +11,8 @@ if (-not (Get-Command act -ErrorAction SilentlyContinue)) {
 }
 
 $SecretFile = Join-Path $PSScriptRoot "..\..\.LOCAL\.secrets"
-$EventFile = Join-Path $PSScriptRoot "..\..\ci\act\on-new-release-event.json"
-$Workflow = Join-Path $PSScriptRoot "..\..\.github\workflows\on-new-release.yml"
+$EventFile = Join-Path $PSScriptRoot "..\..\ci\act\create-index_json-on-new-release-event.json"
+$Workflow = Join-Path $PSScriptRoot "..\..\.github\workflows\create-index_json-on-new-release.yml"
 
 Write-Output "🚀 Running act..."
 
