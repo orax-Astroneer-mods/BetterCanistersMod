@@ -23,7 +23,7 @@ if (-not (Test-Path $SetVarsScript)) {
     throw "Cannot find set-vars.ps1 at path $SetVarsScript"
 }
 
-Write-Host "Loading environment variables from $SetVarsScript..."
+Write-Output "Loading environment variables from $SetVarsScript..."
 & $SetVarsScript -github_ref_name $GithubRefName -github_repository $GithubRepository
 
 # ---------------------------
@@ -33,5 +33,5 @@ if (-not (Test-Path $ScriptToRun)) {
     throw "Target script not found: $ScriptToRun"
 }
 
-Write-Host "Running script: $ScriptToRun"
+Write-Output "Running script: $ScriptToRun"
 & $ScriptToRun

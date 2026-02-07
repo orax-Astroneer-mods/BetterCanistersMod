@@ -27,6 +27,10 @@ jobs:
     runs-on: windows-latest
 
     steps:
+    - name: Init
+      run: |
+        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
     - name: Checkout
       uses: actions/checkout@v4
 
@@ -66,6 +70,6 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        Write-Host "Deleting temporary tag v0.0.0"
+        Write-Output "Deleting temporary tag v0.0.0"
         git tag -d v0.0.0 2>$null
         git push origin :refs/tags/v0.0.0

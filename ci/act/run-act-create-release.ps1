@@ -10,13 +10,15 @@ if (-not (Get-Command act -ErrorAction SilentlyContinue)) {
     exit 1
 }
 
-$SecretFile = Join-Path $PSScriptRoot "..\.LOCAL\.secrets"
-$EventFile = Join-Path $PSScriptRoot "..\ci\event.json"
+$SecretFile = Join-Path $PSScriptRoot "..\..\.LOCAL\.secrets"
+$EventFile = Join-Path $PSScriptRoot "..\..\ci\act\create-release-event.json"
+$Workflow = Join-Path $PSScriptRoot "..\..\.github\workflows\create-release.yml"
 
-Write-Host "🚀 Running act..." -ForegroundColor Cyan
+Write-Output "🚀 Running act..."
 
 # Note: $PassThruArgs is passed at the end
 & act -P windows-latest=-self-hosted `
     --secret-file "$SecretFile" `
     -e "$EventFile" `
+    -W "$Workflow" `
     @PassThruArgs

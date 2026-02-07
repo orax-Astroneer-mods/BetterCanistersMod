@@ -13,7 +13,7 @@ param(
 
 Set-StrictMode -Version Latest
 
-Write-Host "🔍 Searching for v0.0.0 drafts in: $github_repository" -ForegroundColor Cyan
+Write-Output "🔍 Searching for v0.0.0 drafts in: $github_repository"
 
 if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
     throw "GitHub CLI (gh) not found."
@@ -30,13 +30,13 @@ if ($LASTEXITCODE -ne 0) {
 $draftsToDelete = $drafts | Where-Object { $_.isDraft -eq $true -and ($_.name -eq 'v0.0.0' -or $_.tagName -eq 'v0.0.0') }
 
 if (-not $draftsToDelete) {
-    Write-Host "✅ No draft releases named v0.0.0 found." -ForegroundColor Green
+    Write-Output "✅ No draft releases named v0.0.0 found."
     return
 }
 
 foreach ($release in $draftsToDelete) {
     # Use tagName for deletion if name is ambiguous
     $target = if ($release.tagName) { $release.tagName } else { $release.name }
-    Write-Host "🗑️ Deleting draft release: $target" -ForegroundColor Yellow
+    Write-Output "🗑️ Deleting draft release: $target"
     gh release delete $target --repo $github_repository --yes
 }

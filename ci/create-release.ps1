@@ -54,7 +54,7 @@ Set-Content -Path (Join-Path $env:TARGET_DIR "version.txt") -Value $env:VERSION
 if (Test-Path $env:RELEASE_FULL_PATH) { Remove-Item $env:RELEASE_FULL_PATH }
 
 Compress-Archive -Path $env:TARGET_DIR -DestinationPath $env:RELEASE_FULL_PATH -Force
-Write-Host "ZIP created: $env:RELEASE_FULL_PATH"
+Write-Output "ZIP created: $env:RELEASE_FULL_PATH"
 
 if (-not (Test-Path $env:RELEASE_FULL_PATH)) {
     throw "ZIP release failed."
@@ -106,7 +106,7 @@ $RepakExe = Join-Path $env:RESOURCES_DIR "repak_cli-x86_64-pc-windows-msvc\repak
 $PakDir = (Resolve-Path $env:PAK_TARGET_DIR).Path
 
 $CmdArgs = @("pack", "--version", "V4", $PakDir)
-Write-Host "Run command: $RepakExe $($CmdArgs -join ' ')"
+Write-Output "Run command: $RepakExe $($CmdArgs -join ' ')"
 & $RepakExe @CmdArgs
 
 if ($LASTEXITCODE -ne 0 -or -not (Test-Path "$env:PAK_RELEASE_FULL_PATH")) {

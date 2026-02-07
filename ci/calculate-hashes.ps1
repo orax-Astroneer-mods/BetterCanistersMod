@@ -18,7 +18,7 @@ $hash = (Get-FileHash `
         -Path $releaseFile
 ).Hash
 
-Write-Host "releaseFile => $($env:HASH_ALGORITHM): $hash"
+Write-Output "releaseFile => $($env:HASH_ALGORITHM): $hash"
 
 if ($env:GITHUB_ENV) {
     "HASH=$hash" | Out-File -FilePath $env:GITHUB_ENV -Append
@@ -33,7 +33,7 @@ $hashPakFile = (Get-FileHash `
         -Path $pakReleaseFile
 ).Hash
 
-Write-Host "pakReleaseFile => $($env:HASH_ALGORITHM): $hashPakFile"
+Write-Output "pakReleaseFile => $($env:HASH_ALGORITHM): $hashPakFile"
 
 if ($env:GITHUB_ENV) {
     "HASH_PAK_FILE=$hashPakFile" | Out-File -FilePath $env:GITHUB_ENV -Append

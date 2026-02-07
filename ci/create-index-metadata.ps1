@@ -6,7 +6,7 @@ param(
 
 Set-StrictMode -Version Latest
 
-Write-Host "📝 Release is draft: $IsDraft"
+Write-Output "📝 Release is draft: $IsDraft"
 
 # Default to false if $env:ACT is not set
 if ($null -ne $env:ACT) {
@@ -22,12 +22,12 @@ else {
     $act = $false
 }
 
-Write-Host "🧪 act is $act"
+Write-Output "🧪 act is $act"
 
 
 # Check if the local file exists
 if (-not (Test-Path $env:TAGS_PATH)) {
-    Write-Host "$env:TAGS_PATH not found. Downloading from GitHub..."
+    Write-Output "$env:TAGS_PATH not found. Downloading from GitHub..."
 
     $TagsUrl = "https://api.github.com/repos/$env:REPO_OWNER/$env:REPO_NAME/tags"
     $Headers = @{ "User-Agent" = "Mozilla/5.0" }  # GitHub API requires a User-Agent
@@ -45,14 +45,14 @@ if (-not (Test-Path $env:TAGS_PATH)) {
         # Save locally as JSON
         $Tags | ConvertTo-Json -Depth 10 | Set-Content $env:TAGS_PATH -Encoding UTF8
 
-        Write-Host "Tags saved to $env:TAGS_PATH"
+        Write-Output "Tags saved to $env:TAGS_PATH"
     }
     catch {
         throw "Failed to download tags. URL: $TagsUrl $_"
     }
 }
 else {
-    Write-Host "$env:TAGS_PATH already exists. Using local file."
+    Write-Output "$env:TAGS_PATH already exists. Using local file."
     $Tags = Get-Content $env:TAGS_PATH -Raw | ConvertFrom-Json
 }
 
@@ -90,10 +90,10 @@ foreach ($TagObj in $Tags) {
             download_url = $ReleaseUrl
             filename     = $FileName
         }
-        Write-Host "✅ Added: $Version" -ForegroundColor Green
+        Write-Output "✅ Added: $Version"
     }
     catch {
-        Write-Host "❌ Asset not found for $TagName. URL: $ReleaseUrl" -ForegroundColor Red
+        Write-Warning "❌ Asset not found for $TagName. URL: $ReleaseUrl"
     }
 }
 
@@ -133,17 +133,7 @@ $Json.mods = $SortedMods
 # Convert your object to JSON (Depth 10 to preserve nested objects)
 $JsonText = $Json | ConvertTo-Json -Depth 10
 
-# ANSI escape codes for colors (works in act)
-$Cyan = "`e[36;41m"
-$Reset = "`e[0m"
-
-$Output = "✅ test"
-[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-Write-Output $Output
-
-
-# Print title in cyan
-Write-Host "${Cyan}📄 Current JSON content:${Reset}`n"
+Write-Output "📄 Current JSON content:`n"
 
 # Print JSON as plain text
 Write-Output $JsonText
@@ -151,4 +141,4 @@ Write-Output $JsonText
 # Save JSON to file
 $JsonText | Set-Content $env:INDEX_PATH -Encoding UTF8
 
-Write-Host "`n✨ File $env:INDEX_PATH updated and sorted successfully!`n"
+Write-Output "`n✨ File $env:INDEX_PATH updated and sorted successfully!`n"
