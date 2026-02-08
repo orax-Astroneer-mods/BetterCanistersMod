@@ -12,8 +12,9 @@
       "type": "string"
     },
     "canonical_name": {
-      "description": "The canonical name.",
+      "description": "The canonical name. Cannot be empty or contain any whitespace.",
       "minLength": 1,
+      "pattern": "[^\\s]",
       "type": "string"
     },
     "description": {
@@ -34,7 +35,10 @@
     }
   },
   "required": [
+    "author",
     "canonical_name",
+    "description",
+    "homepage",
     "name"
   ],
   "title": "Mod metadata schema",

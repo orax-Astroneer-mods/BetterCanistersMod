@@ -77,7 +77,7 @@ foreach ($dir in $dirs) {
 }
 
 # Set variables for a custom game if exists
-if ($github_repository -match "-([^-]+)-mods/") {
+if ($repoOwner -match "-([^-]+)-mods") {
     $gameName = $Matches[1]
     Write-Output "🕹️ Set environment variables for the game: $gameName"
     $gameName = $gameName.ToLowerInvariant()
@@ -86,11 +86,14 @@ if ($github_repository -match "-([^-]+)-mods/") {
     $scriptPath = Join-Path $projectRootDir "games/$gameName/ci/$scriptName"
 
     if (Test-Path $scriptPath) {
-        Write-Output "🚀 Executing custom script '$scriptName' for this game: $scriptPath"
+        Write-Output "🚀 Executing custom script '$scriptName' for the game ($gameName): $scriptPath"
         # Set game-specific environment variables
-        . $scriptPath
+        & $scriptPath
     }
     else {
         throw "❌ Custom script for the game '$gameName' does not exist. scriptPath: $scriptPath"
     }
+}
+else {
+    Write-Warning "Cannot get the game name from repository owner: $repoOwner"
 }
