@@ -13,7 +13,7 @@ if (-not (Get-Command act -ErrorAction SilentlyContinue)) {
 $RootDir = (Resolve-Path (Join-Path $PSScriptRoot "../../../../")).Path
 $SecretFile = Join-Path $RootDir "/.LOCAL/.secrets"
 $EventFile = Join-Path $RootDir "/games/astroneer/ci/act/create-index_json-on-new-release-event.json"
-$Workflow = Join-Path $RootDir "/.github/workflows/games/astroneer/create-index_json-on-new-release.yml"
+$Workflow = Join-Path $RootDir "/.github/workflows/game-astroneer_create-index_json-on-new-release.yml"
 
 Write-Output "🚀 Running act..."
 
