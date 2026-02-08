@@ -92,7 +92,7 @@ foreach ($TagObj in $Tags) {
         Write-Output "✅ Added: $Version"
     }
     catch {
-        Write-Warning "❌ Asset not found for $TagName. URL: $ReleaseUrl"
+        Write-Warning "⚠️ Asset not found for $TagName. URL: $ReleaseUrl"
     }
 }
 
