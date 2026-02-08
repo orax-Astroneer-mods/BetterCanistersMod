@@ -24,10 +24,9 @@ else {
 
 Write-Output "🧪 act is $act"
 
-
 # Check if the local file exists
-if (-not (Test-Path $env:TAGS_PATH)) {
-    Write-Output "$env:TAGS_PATH not found. Downloading from GitHub..."
+if (-not (Test-Path $env:ASTRONEER_TAGS_PATH)) {
+    Write-Output "$env:ASTRONEER_TAGS_PATH not found. Downloading from GitHub..."
 
     $TagsUrl = "https://api.github.com/repos/$env:REPO_OWNER/$env:REPO_NAME/tags"
     $Headers = @{ "User-Agent" = "Mozilla/5.0" }  # GitHub API requires a User-Agent
@@ -43,29 +42,29 @@ if (-not (Test-Path $env:TAGS_PATH)) {
         }
 
         # Save locally as JSON
-        $Tags | ConvertTo-Json -Depth 10 | Set-Content $env:TAGS_PATH -Encoding UTF8
+        $Tags | ConvertTo-Json -Depth 10 | Set-Content $env:ASTRONEER_TAGS_PATH -Encoding UTF8
 
-        Write-Output "Tags saved to $env:TAGS_PATH"
+        Write-Output "Tags saved to $env:ASTRONEER_TAGS_PATH"
     }
     catch {
         throw "Failed to download tags. URL: $TagsUrl $_"
     }
 }
 else {
-    Write-Output "$env:TAGS_PATH already exists. Using local file."
-    $Tags = Get-Content $env:TAGS_PATH -Raw | ConvertFrom-Json
+    Write-Output "$env:ASTRONEER_TAGS_PATH already exists. Using local file."
+    $Tags = Get-Content $env:ASTRONEER_TAGS_PATH -Raw | ConvertFrom-Json
 }
 
 # Initialize main structure
 $Json = [ordered]@{ mods = [ordered]@{} }
-if (Test-Path $env:INDEX_PATH) {
+if (Test-Path $env:ASTRONEER_INDEX_PATH) {
     # Load existing manifest as a Hashtable to allow dynamic key manipulation
-    $Json = Get-Content $env:INDEX_PATH -Raw | ConvertFrom-Json -AsHashtable
+    $Json = Get-Content $env:ASTRONEER_INDEX_PATH -Raw | ConvertFrom-Json -AsHashtable
 }
 
 # Ensure the specific mod entry exists
-if (-not $Json.mods.Contains($env:CANONICAL_MOD_NAME)) {
-    $Json.mods[$env:CANONICAL_MOD_NAME] = [ordered]@{ latest_version = ""; versions = [ordered]@{} }
+if (-not $Json.mods.Contains($env:MOD_CANONICAL_NAME)) {
+    $Json.mods[$env:MOD_CANONICAL_NAME] = [ordered]@{ latest_version = ""; versions = [ordered]@{} }
 }
 
 # Process Tags
@@ -77,7 +76,7 @@ foreach ($TagObj in $Tags) {
     $Version = $Matches[1]
 
     # Skip if version already exists to save network requests
-    if ($Json.mods.$env:CANONICAL_MOD_NAME.versions.Contains($Version)) { continue }
+    if ($Json.mods.$env:MOD_CANONICAL_NAME.versions.Contains($Version)) { continue }
 
     $FileName = "000-$env:REPO_NAME-$Version`_P.pak"
     $ReleaseUrl = "https://github.com/$env:REPO_OWNER/$env:REPO_NAME/releases/download/$TagName/$FileName"
@@ -86,7 +85,7 @@ foreach ($TagObj in $Tags) {
         # Verify if the release asset actually exists
         Invoke-WebRequest -Uri $ReleaseUrl -Method Head -UserAgent "Mozilla/5.0" -ErrorAction Stop | Out-Null
         
-        $Json.mods.$env:CANONICAL_MOD_NAME.versions.$Version = [ordered]@{
+        $Json.mods.$env:MOD_CANONICAL_NAME.versions.$Version = [ordered]@{
             download_url = $ReleaseUrl
             filename     = $FileName
         }
@@ -100,17 +99,17 @@ foreach ($TagObj in $Tags) {
 # --- RESTRUCTURING & FINAL SORTING ---
 
 # Sort versions for the current mod (using [version] type for correct numerical sorting)
-$AllVersions = $Json.mods.$env:CANONICAL_MOD_NAME.versions.Keys | Sort-Object { [version]$_ }
+$AllVersions = $Json.mods.$env:MOD_CANONICAL_NAME.versions.Keys | Sort-Object { [version]$_ }
 
 if ($AllVersions) {
     $SortedVersions = [ordered]@{}
     foreach ($v in $AllVersions) { 
-        $SortedVersions[$v] = $Json.mods.$env:CANONICAL_MOD_NAME.versions.$v
+        $SortedVersions[$v] = $Json.mods.$env:MOD_CANONICAL_NAME.versions.$v
     }
 
     # Update current mod data
-    $Json.mods.$env:CANONICAL_MOD_NAME.versions = $SortedVersions
-    $Json.mods.$env:CANONICAL_MOD_NAME.latest_version = $AllVersions | Select-Object -Last 1
+    $Json.mods.$env:MOD_CANONICAL_NAME.versions = $SortedVersions
+    $Json.mods.$env:MOD_CANONICAL_NAME.latest_version = $AllVersions | Select-Object -Last 1
 }
 
 # ALPHABETICAL SORTING OF MODS + KEY ORDERING
@@ -139,6 +138,6 @@ Write-Output "📄 Current JSON content:`n"
 Write-Output $JsonText
 
 # Save JSON to file
-$JsonText | Set-Content $env:INDEX_PATH -Encoding UTF8
+$JsonText | Set-Content $env:ASTRONEER_INDEX_PATH -Encoding UTF8
 
-Write-Output "`n✨ File $env:INDEX_PATH updated and sorted successfully!`n"
+Write-Output "`n✨ File $env:ASTRONEER_INDEX_PATH updated and sorted successfully!`n"

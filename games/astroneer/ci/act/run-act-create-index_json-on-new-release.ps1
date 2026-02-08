@@ -10,9 +10,10 @@ if (-not (Get-Command act -ErrorAction SilentlyContinue)) {
     exit 1
 }
 
-$SecretFile = Join-Path $PSScriptRoot "..\..\.LOCAL\.secrets"
-$EventFile = Join-Path $PSScriptRoot "..\..\ci\act\create-index_json-on-new-release-event.json"
-$Workflow = Join-Path $PSScriptRoot "..\..\.github\workflows\create-index_json-on-new-release.yml"
+$RootDir = (Resolve-Path (Join-Path $PSScriptRoot "../../../../")).Path
+$SecretFile = Join-Path $RootDir "/.LOCAL/.secrets"
+$EventFile = Join-Path $RootDir "/games/astroneer/ci/act/create-index_json-on-new-release-event.json"
+$Workflow = Join-Path $RootDir "/.github/workflows/games/astroneer/create-index_json-on-new-release.yml"
 
 Write-Output "🚀 Running act..."
 

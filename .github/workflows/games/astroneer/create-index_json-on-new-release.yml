@@ -22,6 +22,9 @@ defaults:
 
 jobs:
   main-job:
+    # ⚠️ Ensure the workflow runs only for Astroneer mods repositories.
+    if: endsWith(github.repository_owner, '-Astroneer-mods')
+
     runs-on: windows-latest
     
     steps:
@@ -43,13 +46,13 @@ jobs:
       run: |
         .\ci\set-vars.ps1 -github_ref_name '${{ github.ref_name }}' -github_repository $env:GITHUB_REPOSITORY
 
-    - name: Create index.json metadata
+    - name: Create index.json
       run: |
-        .\ci\create-index-metadata.ps1
+        .\games\astroneer\ci\create-index_json.ps1
 
     - name: Commit index.json
       run: |
-        $file = "resources/index.json"
+        $file = "games\astroneer\resources\index.json"
         
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
@@ -62,6 +65,9 @@ jobs:
             }
 
             $tag = $env:GITHUB_REF_NAME
+
+            # [skip ci] means skipping workflow runs
+            # https://docs.github.com/en/actions/how-tos/manage-workflow-runs/skip-workflow-runs
             $msg = "ci: update index.json for release $tag [skip ci]"
 
             git add $file
@@ -76,6 +82,5 @@ jobs:
                 git push
             }
         } else {
-            Write-Error "❌ File $file not found. Nothing to commit."
-            exit 1
+            Throw "❌ File $file not found. Nothing to commit."
         }

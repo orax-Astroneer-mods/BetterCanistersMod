@@ -35,13 +35,11 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Set environment variables
-      run: .\ci\set-vars.ps1 -github_ref_name '${{ github.ref_name }}' -github_repository $env:GITHUB_REPOSITORY
+      run: |
+        \ci\set-vars.ps1 -github_ref_name '${{ github.ref_name }}' -github_repository $env:GITHUB_REPOSITORY
 
     - name: Create release
       run: .\ci\create-release.ps1
-      
-    - name: Calculate hashes
-      run: .\ci\calculate-hashes.ps1
 
     - name: Cleanup draft v0.0.0 releases
       if: env.ACT == 'true' && startsWith(github.ref, 'refs/tags/') && github.ref_name == 'v0.0.0'
@@ -54,16 +52,8 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         files: |
-          ${{ env.RELEASE_DIR }}/${{ env.RELEASE_FILENAME }}
-          ${{ env.RELEASE_DIR }}/${{ env.PAK_RELEASE_FILENAME }}
+          ${{ env.RELEASE_DIR }}/*
         draft: ${{ inputs.isDraft == true && true || false }}
-        append_body: false
-        body: |
-          ```
-          VERSION: ${{ env.VERSION }}
-          ${{ env.RELEASE_FILENAME }} (${{ env.HASH_ALGORITHM}}): ${{ env.HASH }}
-          ${{ env.PAK_RELEASE_FILENAME }} (${{ env.HASH_ALGORITHM}}): ${{ env.HASH_PAK_FILE }}
-          ```
 
     - name: Delete temporary tag v0.0.0
       if: env.ACT == 'true' && startsWith(github.ref, 'refs/tags/') && github.ref_name == 'v0.0.0'

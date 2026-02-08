@@ -2,10 +2,10 @@
     "schema_version": 2,
     "name": "{MOD_NAME}",
     "mod_id": "{MOD_ID}",
-    "author": "orax",
+    "author": "{MOD_AUTHOR}",
     "description": "{MOD_DESCRIPTION}",
     "version": "{VERSION}",
     "sync": "client",
-    "homepage": "https://www.nexusmods.com/profile/0R4X/mods?gameId=1955",
+    "homepage": "{MOD_HOMEPAGE}",
     "enable_ue4ss": "true"
 }

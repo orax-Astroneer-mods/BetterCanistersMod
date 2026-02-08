@@ -9,91 +9,56 @@ param(
 
 Set-StrictMode -Version Latest
 
-$readmeFile = "README.md"
+Write-Host "🏷️ github_ref_name: $github_ref_name"
+Write-Host "📦 github_repository: $github_repository"
+
+$projectRootDir = (Resolve-Path (Join-Path $PSScriptRoot "../")).Path
 $version = $github_ref_name -replace '^v(?=\d+\.\d+\.\d+)', ''
-$repo = $github_repository
-$repoOwner, $repoName = $repo -split '/'
-$canonicalModName = $repoName -replace 'Mod$', ''
+$repoOwner, $repoName = $github_repository -split '/'
 
-$modName = ""
-try {
-    $modName = (Get-Content $readmeFile -TotalCount 1) -replace '^#\s+', ''
-}
-catch {
-    throw "Unable to get mod name from $readmeFile."
-}
-
-$resourcesDir = "resources"
 $tempDir = ".TEMP"
 $releaseDir = ".RELEASE"
+$resourcesDir = "resources"
 $targetDir = Join-Path $releaseDir $repoName
-$pakTargetDir = Join-Path $releaseDir "000-$repoName-$version`_P"
-
-$tagsPath = Join-Path $tempDir "tags.json"
-$indexPath = Join-Path $resourcesDir "index.json"
-        
+     
 $releaseFilename = "$repoName.zip"
-$releaseFullPath = "$releaseDir\$releaseFilename"
-$pakReleaseFilename = "000-$repoName-$version`_P.pak"
-$pakReleaseFullPath = "$releaseDir\$pakReleaseFilename"
-       
-$hashAlgorithm = "SHA-256"
+$releaseRelPath = "$releaseDir\$releaseFilename"
 
-# Read description in README.md
-# Format:
-#    # Mod name
-#
-#    > Description...
-#    > More description...
-#
-#    Other text.
-$lines = Get-Content $readmeFile | Select-Object -Skip 2
-$description = ''
-foreach ($line in $lines) {
-    if ($line -like '>*') {
-        # Remove the leading '>' and spaces
-        $cleanLine = $line -replace '^> *', ''
-
-        # Add literal \n if descriptionText is not empty (i.e., not first line)
-        if ($description -ne '') {
-            $description += '\n'
-        }
-
-        $description += $cleanLine -replace ' +$', ''
-    }
-    else {
-        break
-    }
+# Read the mod metadata in the mod.json file.
+$jsonPath = Join-Path $projectRootDir "mod.json"
+$jsonRawContent = Get-Content -Path $jsonPath -Raw -Encoding utf8
+$schemaPath = "./resources/schema.json"
+if (-not ($jsonRawContent | Test-Json)) {
+    throw "❌ Malformed JSON (syntax error). JSON path: $jsonPath"
 }
+if (-not ($jsonRawContent | Test-Json -SchemaFile $schemaPath)) {
+    throw "❌ JSON is valid but does not conform to the schema rules. JSON path: $jsonPath"
+}
+$modMetadata = $jsonRawContent | ConvertFrom-Json
 
 @{
-    VERSION               = $version
-    REPO_OWNER            = $repoOwner
-    REPO_NAME             = $repoName
-    CANONICAL_MOD_NAME    = $canonicalModName 
-    MOD_NAME              = $modName
+    PROJECT_ROOT_DIR   = $projectRootDir
 
-    RESOURCES_DIR         = $resourcesDir
-    TEMP_DIR              = $tempDir
-    RELEASE_DIR           = $releaseDir
-    TARGET_DIR            = $targetDir
-    PAK_TARGET_DIR        = $pakTargetDir
+    VERSION            = $version
+    REPO_OWNER         = $repoOwner
+    REPO_NAME          = $repoName
+    MOD_AUTHOR         = $modMetadata.author
+    MOD_CANONICAL_NAME = $modMetadata.canonical_name 
+    MOD_DESCRIPTION    = $modMetadata.description
+    MOD_HOMEPAGE       = $modMetadata.homepage
+    MOD_NAME           = $modMetadata.name
 
-    TAGS_PATH             = $tagsPath
-    INDEX_PATH            = $indexPath
+    RESOURCES_DIR      = $resourcesDir
+    TEMP_DIR           = $tempDir
+    RELEASE_DIR        = $releaseDir
+    TARGET_DIR         = $targetDir
 
-    RELEASE_FILENAME      = $releaseFilename
-    RELEASE_FULL_PATH     = $releaseFullPath
-    PAK_RELEASE_FILENAME  = $pakReleaseFilename
-    PAK_RELEASE_FULL_PATH = $pakReleaseFullPath
-
-    HASH_ALGORITHM        = $hashAlgorithm
-
-    MOD_DESCRIPTION       = $description
+    RELEASE_FILENAME   = $releaseFilename
+    RELEASE_REL_PATH   = $releaseRelPath
 }.GetEnumerator() | ForEach-Object {
     if ($env:GITHUB_ENV) {
         # Export for next GitHub Actions steps
-        "$($_.Key)=$($_.Value)" | Out-File $env:GITHUB_ENV -Append
+        "$($_.Key)=$($_.Value)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
     }
     else {
         # Make variable available in the current script (useful when script is run locally)
@@ -108,5 +73,24 @@ $dirs = @($resourcesDir, $tempDir, $releaseDir)
 foreach ($dir in $dirs) {
     if (-not (Test-Path $dir)) {
         New-Item -Path $dir -ItemType Directory | Out-Null
+    }
+}
+
+# Set variables for a custom game if exists
+if ($github_repository -match "-([^-]+)-mods/") {
+    $gameName = $Matches[1]
+    Write-Output "🕹️ Set environment variables for the game: $gameName"
+    $gameName = $gameName.ToLowerInvariant()
+    $scriptName = "set-vars.ps1"
+    "GAME_NAME=$gameName" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+    $scriptPath = Join-Path $projectRootDir "games/$gameName/ci/$scriptName"
+
+    if (Test-Path $scriptPath) {
+        Write-Output "🚀 Executing custom script '$scriptName' for this game: $scriptPath"
+        # Set game-specific environment variables
+        . $scriptPath
+    }
+    else {
+        throw "❌ Custom script for the game '$gameName' does not exist. scriptPath: $scriptPath"
     }
 }
