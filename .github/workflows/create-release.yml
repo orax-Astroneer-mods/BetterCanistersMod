@@ -36,7 +36,7 @@ jobs:
 
     - name: Set environment variables
       run: |
-        \ci\set-vars.ps1 -github_ref_name '${{ github.ref_name }}' -github_repository $env:GITHUB_REPOSITORY
+        .\ci\set-vars.ps1 -github_ref_name '${{ github.ref_name }}' -github_repository $env:GITHUB_REPOSITORY
 
     - name: Create release
       run: .\ci\create-release.ps1
