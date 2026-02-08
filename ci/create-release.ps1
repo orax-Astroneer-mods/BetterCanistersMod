@@ -14,7 +14,7 @@ Set-StrictMode -Version Latest
 # Prepare the release folder
 #
 
-if (-Not (Test-Path $env:RELEASE_DIR)) {
+if (-not (Test-Path $env:RELEASE_DIR)) {
     New-Item -Path $env:RELEASE_DIR -ItemType Directory | Out-Null
 }
 
@@ -29,7 +29,7 @@ New-Item -Path $env:TARGET_DIR -ItemType Directory | Out-Null
 #
 
 # Read excluded files for the release from an external file
-$Excludes = Get-Content -Path '.\ci\excluded-files-in-release.txt'
+$Excludes = Get-Content -Path './ci/excluded-files-in-release.txt'
 
 # Copy "Scripts" directory
 Copy-Item -Path 'Scripts' -Destination $env:TARGET_DIR -Recurse
@@ -44,7 +44,7 @@ Get-ChildItem -File | Where-Object { $Excludes -notcontains $_.Name } | ForEach-
 #
 
 New-Item -Path (Join-Path $env:TARGET_DIR "enabled.txt") -ItemType File | Out-Null
-Set-Content -Path (Join-Path $env:TARGET_DIR "version.txt") -Value $env:VERSION
+Set-Content -Path (Join-Path $PSScriptRoot "$env:TARGET_DIR/version.txt") -Value $env:VERSION
 
 #
 # Create ZIP archive

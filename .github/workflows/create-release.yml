@@ -43,7 +43,7 @@ jobs:
 
     - name: Create game-specific release
       run: |
-        $scriptPath = "games/$env:GAME_NAME/ci/create-release.ps1"
+        $scriptPath = Join-Path "games" $env:GAME_NAME "ci" "create-release.ps1"
         
         if (Test-Path $scriptPath) {
           Write-Host "🚀 Running game-specific release script for: $env:GAME_NAME"

@@ -8,6 +8,9 @@ Set-StrictMode -Version Latest
 
 Write-Output "📝 Release is draft: $IsDraft"
 
+$astroneer_indexFilePath = Join-Path $PSScriptRoot ".." $env:RESOURCES_DIR "index.json"
+$astroneer_tagsFilePath = Join-Path $PSScriptRoot ".." $env:ASTRONEER_TEMP_DIR "tags.json"
+
 # Default to false if $env:ACT is not set
 if ($null -ne $env:ACT) {
     try {
@@ -25,8 +28,8 @@ else {
 Write-Output "🧪 act is $act"
 
 # Check if the local file exists
-if (-not (Test-Path $env:ASTRONEER_TAGS_PATH)) {
-    Write-Output "$env:ASTRONEER_TAGS_PATH not found. Downloading from GitHub..."
+if (-not (Test-Path $astroneer_tagsFilePath)) {
+    Write-Output "$astroneer_tagsFilePath not found. Downloading from GitHub..."
 
     $TagsUrl = "https://api.github.com/repos/$env:REPO_OWNER/$env:REPO_NAME/tags"
     $Headers = @{ "User-Agent" = "Mozilla/5.0" }  # GitHub API requires a User-Agent
@@ -42,24 +45,24 @@ if (-not (Test-Path $env:ASTRONEER_TAGS_PATH)) {
         }
 
         # Save locally as JSON
-        $Tags | ConvertTo-Json -Depth 10 | Set-Content $env:ASTRONEER_TAGS_PATH -Encoding UTF8
+        $Tags | ConvertTo-Json -Depth 10 | Set-Content $astroneer_tagsFilePath -Encoding UTF8
 
-        Write-Output "Tags saved to $env:ASTRONEER_TAGS_PATH"
+        Write-Output "Tags saved to $astroneer_tagsFilePath"
     }
     catch {
         throw "Failed to download tags. URL: $TagsUrl $_"
     }
 }
 else {
-    Write-Output "$env:ASTRONEER_TAGS_PATH already exists. Using local file."
-    $Tags = Get-Content $env:ASTRONEER_TAGS_PATH -Raw | ConvertFrom-Json
+    Write-Output "$astroneer_tagsFilePath already exists. Using local file."
+    $Tags = Get-Content $astroneer_tagsFilePath -Raw | ConvertFrom-Json
 }
 
 # Initialize main structure
 $Json = [ordered]@{ mods = [ordered]@{} }
-if (Test-Path $env:ASTRONEER_INDEX_PATH) {
+if (Test-Path $astroneer_indexFilePath) {
     # Load existing manifest as a Hashtable to allow dynamic key manipulation
-    $Json = Get-Content $env:ASTRONEER_INDEX_PATH -Raw | ConvertFrom-Json -AsHashtable
+    $Json = Get-Content $astroneer_indexFilePath -Raw | ConvertFrom-Json -AsHashtable
 }
 
 # Ensure the specific mod entry exists
@@ -138,6 +141,6 @@ Write-Output "📄 Current JSON content:`n"
 Write-Output $JsonText
 
 # Save JSON to file
-$JsonText | Set-Content $env:ASTRONEER_INDEX_PATH -Encoding UTF8
+$JsonText | Set-Content $astroneer_indexFilePath -Encoding UTF8
 
-Write-Output "`n✨ File $env:ASTRONEER_INDEX_PATH updated and sorted successfully!`n"
+Write-Output "`n✨ File $astroneer_indexFilePath updated and sorted successfully!`n"

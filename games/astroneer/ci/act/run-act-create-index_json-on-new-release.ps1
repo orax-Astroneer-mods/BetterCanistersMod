@@ -10,10 +10,10 @@ if (-not (Get-Command act -ErrorAction SilentlyContinue)) {
     exit 1
 }
 
-$RootDir = (Resolve-Path (Join-Path $PSScriptRoot "../../../../")).Path
-$SecretFile = Join-Path $RootDir "/.LOCAL/.secrets"
-$EventFile = Join-Path $RootDir "/games/astroneer/ci/act/create-index_json-on-new-release-event.json"
-$Workflow = Join-Path $RootDir "/.github/workflows/game-astroneer_create-index_json-on-new-release.yml"
+$RootDir = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot "../../../../"))
+$SecretFile = Join-Path $RootDir ".LOCAL/.secrets"
+$EventFile = Join-Path $RootDir "games/astroneer/ci/act/create-index_json-on-new-release-event.json"
+$Workflow = Join-Path $RootDir ".github/workflows/game-astroneer_create-index_json-on-new-release.yml"
 
 Write-Output "🚀 Running act..."
 
