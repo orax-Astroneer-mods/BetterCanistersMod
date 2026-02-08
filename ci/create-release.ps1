@@ -10,6 +10,8 @@ PowerShell script to create a GitHub release
 
 Set-StrictMode -Version Latest
 
+Push-Location (Join-Path $PSScriptRoot "..") -Verbose
+
 #
 # Prepare the release folder
 #
@@ -43,8 +45,8 @@ Get-ChildItem -File | Where-Object { $Excludes -notcontains $_.Name } | ForEach-
 # Create enabled.txt and version.txt
 #
 
-New-Item -Path (Join-Path $env:TARGET_DIR "enabled.txt") -ItemType File | Out-Null
-Set-Content -Path (Join-Path $PSScriptRoot "$env:TARGET_DIR/version.txt") -Value $env:VERSION
+New-Item -Path (Join-Path -Path  $env:TARGET_DIR "enabled.txt") -ItemType File | Out-Null
+Set-Content -Path (Join-Path -Path $env:TARGET_DIR "version.txt") -Value $env:VERSION
 
 #
 # Create ZIP archive
@@ -58,3 +60,5 @@ Write-Output "ZIP created: $env:RELEASE_REL_PATH"
 if (-not (Test-Path $env:RELEASE_REL_PATH)) {
     throw "ZIP release failed."
 }
+
+Pop-Location

@@ -1,5 +1,7 @@
 Set-StrictMode -Version Latest
 
+Push-Location (Join-Path $PSScriptRoot "..") -Verbose
+
 $ReleaseDir = Join-Path $env:PROJECT_ROOT_DIR $env:RELEASE_DIR
 
 Write-Output "🔍 Searching for release files in: $ReleaseDir"
@@ -26,3 +28,5 @@ $FileList | ForEach-Object { Write-Output " - $(Split-Path $_ -Leaf)" }
 $env:RELEASE_FILES_LIST = $FilesString
 
 Write-Output "✅ Local environment variable 'RELEASE_FILES_LIST' has been set for this session."
+
+Pop-Location

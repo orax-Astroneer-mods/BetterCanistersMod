@@ -45,6 +45,7 @@ Set-Content -Path $TargetMetadata -Value $Content -Encoding utf8
 # https://github.com/trumank/repak
 #
 
+
 $RepakExe = Join-Path $env:PROJECT_ROOT_DIR "$env:RESOURCES_DIR/repak_cli-x86_64-pc-windows-msvc/repak.exe"
 
 if (-not (Test-Path $astroneer_pakDir)) {

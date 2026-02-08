@@ -6,10 +6,12 @@ param(
 
 Set-StrictMode -Version Latest
 
+Push-Location (Join-Path $PSScriptRoot "..") -Verbose
+
 Write-Output "📝 Release is draft: $IsDraft"
 
-$astroneer_indexFilePath = Join-Path $PSScriptRoot ".." $env:RESOURCES_DIR "index.json"
-$astroneer_tagsFilePath = Join-Path $PSScriptRoot ".." $env:ASTRONEER_TEMP_DIR "tags.json"
+$astroneer_indexFilePath = Join-Path $env:RESOURCES_DIR "index.json"
+$astroneer_tagsFilePath = Join-Path $env:ASTRONEER_TEMP_DIR "tags.json"
 
 # Default to false if $env:ACT is not set
 if ($null -ne $env:ACT) {
@@ -144,3 +146,5 @@ Write-Output $JsonText
 $JsonText | Set-Content $astroneer_indexFilePath -Encoding UTF8
 
 Write-Output "`n✨ File $astroneer_indexFilePath updated and sorted successfully!`n"
+
+Pop-Location

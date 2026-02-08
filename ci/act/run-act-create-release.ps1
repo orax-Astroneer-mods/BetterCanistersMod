@@ -10,10 +10,10 @@ if (-not (Get-Command act -ErrorAction SilentlyContinue)) {
     exit 1
 }
 
-$RootDir = (Resolve-Path (Join-Path $PSScriptRoot "../../")).Path
-$SecretFile = Join-Path $RootDir "/.LOCAL/.secrets"
-$EventFile = Join-Path $RootDir "/ci/act/create-release-event.json"
-$Workflow = Join-Path $RootDir "/.github/workflows/create-release.yml"
+$RootDir = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot "../../"))
+$SecretFile = Join-Path $RootDir ".LOCAL/.secrets"
+$EventFile = Join-Path $RootDir "ci/act/create-release-event.json"
+$Workflow = Join-Path $RootDir ".github/workflows/create-release.yml"
 
 Write-Output "🚀 Running act..."
 

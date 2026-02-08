@@ -9,10 +9,12 @@ param(
 
 Set-StrictMode -Version Latest
 
+Push-Location (Join-Path $PSScriptRoot "..") -Verbose
+
 Write-Host "🏷️ github_ref_name: $github_ref_name"
 Write-Host "📦 github_repository: $github_repository"
 
-$projectRootDir = (Resolve-Path (Join-Path $PSScriptRoot "../")).Path
+$projectRootDir = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot ".."))
 $version = $github_ref_name -replace '^v(?=\d+\.\d+\.\d+)', ''
 $repoOwner, $repoName = $github_repository -split '/'
 
@@ -22,12 +24,12 @@ $resourcesDir = "resources"
 $targetDir = Join-Path $releaseDir $repoName
      
 $releaseFilename = "$repoName.zip"
-$releaseRelPath = "$releaseDir\$releaseFilename"
+$releaseRelPath = Join-Path $releaseDir $releaseFilename
 
 # Read the mod metadata in the mod.json file.
 $jsonPath = Join-Path $projectRootDir "mod.json"
 $jsonRawContent = Get-Content -Path $jsonPath -Raw -Encoding utf8
-$schemaPath = "./resources/schema.json"
+$schemaPath = Join-Path "resources" "schema.json"
 if (-not ($jsonRawContent | Test-Json)) {
     throw "❌ Malformed JSON (syntax error). JSON path: $jsonPath"
 }
@@ -81,19 +83,21 @@ if ($repoOwner -match "-([^-]+)-mods") {
     $gameName = $Matches[1]
     Write-Output "🕹️ Set environment variables for the game: $gameName"
     $gameName = $gameName.ToLowerInvariant()
-    $scriptName = "set-vars.ps1"
+    $scriptName = "script.ps1"
     "GAME_NAME=$gameName" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
     $scriptPath = Join-Path $projectRootDir "games/$gameName/ci/$scriptName"
 
     if (Test-Path $scriptPath) {
         Write-Output "🚀 Executing custom script '$scriptName' for the game ($gameName): $scriptPath"
-        # Set game-specific environment variables
+        # Run game-specific script
         & $scriptPath
     }
     else {
-        throw "❌ Custom script for the game '$gameName' does not exist. scriptPath: $scriptPath"
+        Write-Output "Custom script ($scriptName) for the game '$gameName' does not exist. scriptPath: $scriptPath"
     }
 }
 else {
     Write-Warning "Cannot get the game name from repository owner: $repoOwner"
 }
+
+Pop-Location

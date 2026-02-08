@@ -13,6 +13,8 @@ param(
 
 Set-StrictMode -Version Latest
 
+Push-Location (Join-Path $PSScriptRoot "..") -Verbose
+
 Write-Output "🔍 Searching for v0.0.0 drafts in: $github_repository"
 
 if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
@@ -40,3 +42,5 @@ foreach ($release in $draftsToDelete) {
     Write-Output "🗑️ Deleting draft release: $target"
     gh release delete $target --repo $github_repository --yes
 }
+
+Pop-Location

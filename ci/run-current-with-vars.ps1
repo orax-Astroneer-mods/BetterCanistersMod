@@ -14,6 +14,8 @@ param(
 
 Set-StrictMode -Version Latest
 
+Push-Location (Join-Path $PSScriptRoot "..") -Verbose
+
 # ---------------------------
 # Load set-vars.ps1
 # ---------------------------
@@ -35,3 +37,5 @@ if (-not (Test-Path $ScriptToRun)) {
 
 Write-Output "Running script: $ScriptToRun"
 & $ScriptToRun
+
+Pop-Location
