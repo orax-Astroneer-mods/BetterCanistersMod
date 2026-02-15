@@ -17,6 +17,7 @@ Oxygen Tank
 ]]
 
 local logging = require("lib.lua-mods-libs.logging")
+local C = require("constants")
 
 local format = string.format
 local CurrentModDirectory = debug.getinfo(1, "S").source:gsub("\\", "/"):match("@?(.+)/[Ss]cripts/")
@@ -127,18 +128,11 @@ end  -- Close onNewCanister function
 -- NEW: Update existing canisters when game loads
 --------------------------------------------------------------------------------
 
--- List of all canister class names from options (MUST be defined before polling functions)
-local canisterClassNames = {
-    "ResourceCanister_Reusable_C",           -- Small Canister
-    "ResourceCanister_Reusable_T2_C",        -- Medium Fluid & Soil Canister
-    "MediumResourceCanister_BP_C",           -- Medium Resource Canister
-    "MediumGasCanister_BP_C",                -- Medium Gas Canister
-    "ResourceCanister_Reusable_T3_C",        -- Large Fluid & Soil Canister
-    "LargeResourceCanister_BP_C",            -- Large Resource Canister
-    "LargeGasCanister_BP_C",                 -- Medium Gas Canister
-    "ExtraLargeResourceCanister_BP_C",       -- Extra Large Resource Canister
-    "Oxygen_Tank_Small_C"                    -- Oxygen Tank
-}
+-- List of all canister class names from constants
+local canisterClassNames = {}
+for _, data in pairs(C) do
+    table.insert(canisterClassNames, data.shortClassName)
+end
 
 --------------------------------------------------------------------------------
 -- Hybrid detection: Try NotifyOnNewObject, fallback to polling if broken
