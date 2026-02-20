@@ -66,35 +66,43 @@ options.Oxygen_Tank_Small_C.ItemTransferRate = nil ---@diagnostic disable-line: 
 
 --------------------------------------------------------------------------------
 
+---@param canister AResourceCanister_Reusable_C|AMediumResourceCanister_BP_C
+---@param newCapacity number
 local function setCapacity(canister, newCapacity)
-    if newCapacity == nil or not canister or not canister:IsValid() then
-        return
-    end
+    ExecuteInGameThread(function()
+        if newCapacity == nil or not canister or not canister:IsValid() then
+            return
+        end
 
-    local itemComponent = canister.ItemComponent
+        local itemComponent = canister.ItemComponent
 
-    if itemComponent and itemComponent:IsValid() and type(itemComponent.Capacity) == "number" then
-        log.debug("Set `Capacity` value: %s => %s", itemComponent.Capacity, newCapacity)
-        itemComponent.Capacity = newCapacity
-    else
-        log.error("Unable to get `itemComponent.Capacity` property.")
-    end
+        if itemComponent and itemComponent:IsValid() and type(itemComponent.Capacity) == "number" then
+            log.debug("Set `Capacity` value: %s => %s", itemComponent.Capacity, newCapacity)
+            itemComponent.Capacity = newCapacity
+        else
+            log.error("Unable to get `itemComponent.Capacity` property.")
+        end
+    end)
 end
 
+---@param canister AResourceCanister_Reusable_C|AMediumResourceCanister_BP_C
+---@param newTransferRate number
 local function setTransferRate(canister, newTransferRate)
-    if newTransferRate == nil or not canister or not canister:IsValid() then
-        return
-    end
-
-    local storageCanister = canister.StorageCanister
-    if storageCanister and storageCanister:IsValid() and type(storageCanister.ItemTransferRate) == "number" then
-        if newTransferRate ~= nil then
-            log.debug("Set `ItemTransferRate` value: %s => %s", storageCanister.ItemTransferRate, newTransferRate)
-            storageCanister.ItemTransferRate = newTransferRate
+    ExecuteInGameThread(function()
+        if newTransferRate == nil or not canister or not canister:IsValid() then
+            return
         end
-    else
-        log.error("Unable to get `StorageCanister.ItemTransferRate` property.")
-    end
+
+        local storageCanister = canister.StorageCanister
+        if storageCanister and storageCanister:IsValid() and type(storageCanister.ItemTransferRate) == "number" then
+            if newTransferRate ~= nil then
+                log.debug("Set `ItemTransferRate` value: %s => %s", storageCanister.ItemTransferRate, newTransferRate)
+                storageCanister.ItemTransferRate = newTransferRate
+            end
+        else
+            log.error("Unable to get `StorageCanister.ItemTransferRate` property.")
+        end
+    end)
 end
 
 ---@param canister AResourceCanister_Reusable_C|AMediumResourceCanister_BP_C
