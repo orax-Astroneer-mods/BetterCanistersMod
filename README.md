@@ -3,7 +3,7 @@
 Customize the capacity and transfer rate of canisters and oxygen tanks in Astroneer.
 
 ## Version
-**v2.2.0-polling** - Updated for Atenfyr's UE4SS v3.0.1 Fork
+**v0.2.0-polling** - Updated for Atenfyr's UE4SS v3.0.1 Fork
 
 ## 🚨 Critical Requirements
 
@@ -39,11 +39,11 @@ Better Canisters uses a single configuration file: **`options.lua`**.
 ## Default Game Values
 (See `options.lua` for full list of adjustable values)
 
-| Name | Capacity | Transfer Rate |
-|------|----------|---------------|
-| Medium Resource | 32 | 1.0 |
-| Large Resource | 400 | 1.0 |
-| Large Gas | 2000 | 5.0 |
+| Name            | Capacity | Transfer Rate |
+| --------------- | -------- | ------------- |
+| Medium Resource | 32       | 1.0           |
+| Large Resource  | 400      | 1.0           |
+| Large Gas       | 2000     | 5.0           |
 
 ## Troubleshooting
 
