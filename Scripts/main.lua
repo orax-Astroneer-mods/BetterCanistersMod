@@ -122,7 +122,7 @@ local function onNewCanister(canister)
         setCapacity(canister, newCapacity)
         setTransferRate(canister, newTransferRate)
     end)
-end  -- Close onNewCanister function
+end -- Close onNewCanister function
 
 --------------------------------------------------------------------------------
 -- NEW: Update existing canisters when game loads
@@ -138,11 +138,12 @@ end
 -- Hybrid detection: Try NotifyOnNewObject, fallback to polling if broken
 --------------------------------------------------------------------------------
 
-local knownCanisters = {} -- Stores canister address -> true
+local knownCanisters = {}              -- Stores canister address -> true
 local pollingActive = false
 local eventBasedDetectionWorks = false -- Set to true if NotifyOnNewObject fires
-local pollingInterval = 3000 -- Check every 3 seconds
+local pollingInterval = 3000           -- Check every 3 seconds
 
+---@param canister AResourceCanister_Reusable_C|AMediumResourceCanister_BP_C
 local function trackCanister(canister)
     if canister and canister:IsValid() then
         local address = tostring(canister:GetAddress())
@@ -150,6 +151,8 @@ local function trackCanister(canister)
     end
 end
 
+---@param canister AResourceCanister_Reusable_C|AMediumResourceCanister_BP_C
+---@return boolean
 local function isKnownCanister(canister)
     if not canister or not canister:IsValid() then return false end
     local address = tostring(canister:GetAddress())
@@ -169,27 +172,21 @@ local function reportNewCanisters()
 end
 
 -- Called when a new canister is detected (either by event or polling)
-local function onCanisterDetected(canister, source)
+---@param canister AResourceCanister_Reusable_C|AMediumResourceCanister_BP_C
+local function onCanisterDetected(canister)
     if not isKnownCanister(canister) then
         trackCanister(canister)
         onNewCanister(canister)
-        
+
         -- Add to batch
         table.insert(newCanisterBatch, canister)
-        
+
         -- Schedule batch report if not already pending
         if not batchPending then
             batchPending = true
-            ExecuteWithDelay(500, reportNewCanisters)  -- Report after 500ms
+            ExecuteWithDelay(500, reportNewCanisters) -- Report after 500ms
         end
     end
-end
-
-local function startPolling()
-    if pollingActive then return end
-    
-    pollingActive = true
-    pollForNewCanisters()
 end
 
 -- NotifyOnNewObject - ONLY works during save load, not for crafted items!
@@ -197,16 +194,17 @@ end
 ---@param canister AResourceCanister_Reusable_C|AMediumResourceCanister_BP_C
 ---@diagnostic disable-next-line: redundant-parameter
 NotifyOnNewObject("/Game/Items/StorageCanister_Reusable_Base.StorageCanister_Reusable_Base_C", function(canister)
-    onCanisterDetected(canister, "NotifyOnNewObject")
+    onCanisterDetected(canister)
 end)
 
--- Polling fallback - active because NotifyOnNewObject is unreliable 
-function pollForNewCanisters()
+-- Polling fallback - active because NotifyOnNewObject is unreliable
+local function pollForNewCanisters()
     if not pollingActive or eventBasedDetectionWorks then return end
-    
+
     local newCanistersFound = 0
-    
+
     for _, className in ipairs(canisterClassNames) do
+        ---@type (AResourceCanister_Reusable_C[]|AMediumResourceCanister_BP_C[])?
         local found = FindAllOf(className)
         if found then
             for _, canister in ipairs(found) do
@@ -218,13 +216,20 @@ function pollForNewCanisters()
             end
         end
     end
-    
+
     if newCanistersFound > 0 then
         log.debug(format("Detected %d new canister(s) via polling", newCanistersFound))
     end
-    
+
     -- Schedule next poll
     ExecuteWithDelay(pollingInterval, pollForNewCanisters)
+end
+
+local function startPolling()
+    if pollingActive then return end
+
+    pollingActive = true
+    pollForNewCanisters()
 end
 
 -- File to track which saves have been processed with options hash
@@ -294,18 +299,18 @@ RegisterHook("/Script/Engine.PlayerController:ClientRestart", function(self)
     -- Wait a bit for world to be available
     ExecuteWithDelay(1000, function()
         local saveName = getCurrentSaveName()
-        
+
         if not saveName then
             log.warn("Could not determine save name, skipping canister update check")
             return
         end
-        
+
         log.debug(format("Loading save '%s'", saveName))
-        
+
         -- Wait for world to fully load before searching
         ExecuteWithDelay(3000, function()
             local canisters = {}
-            
+
             -- Collect all canisters
             for _, className in ipairs(canisterClassNames) do
                 local found = FindAllOf(className)
@@ -317,12 +322,12 @@ RegisterHook("/Script/Engine.PlayerController:ClientRestart", function(self)
                     end
                 end
             end
-            
+
             -- Track all existing canisters so polling can detect new ones
             for _, canister in ipairs(canisters) do
                 trackCanister(canister)
             end
-            
+
             -- ALWAYS: Apply transfer rates (they reset each load)
             local transferUpdated = 0
             for _, canister in ipairs(canisters) do
@@ -332,13 +337,13 @@ RegisterHook("/Script/Engine.PlayerController:ClientRestart", function(self)
                     transferUpdated = transferUpdated + 1
                 end
             end
-            
+
             log.info(format("✅ BetterCanisters: Modified %d existing canisters", transferUpdated))
-            
+
             -- FIRST LOAD ONLY: Apply capacity (permanent, only needed once)
             local processedSaves = loadProcessedSaves()
             local currentOptionsModTime = getOptionsModTime() or 0
-            
+
             local needsCapacityUpdate = false
             if not processedSaves[saveName] then
                 needsCapacityUpdate = true
@@ -346,7 +351,7 @@ RegisterHook("/Script/Engine.PlayerController:ClientRestart", function(self)
                 needsCapacityUpdate = true
                 log.info("Options changed - reapplying capacity")
             end
-            
+
             if needsCapacityUpdate then
                 local capacityUpdated = 0
                 for _, canister in ipairs(canisters) do
@@ -359,7 +364,7 @@ RegisterHook("/Script/Engine.PlayerController:ClientRestart", function(self)
                 -- Mark save as processed
                 markSaveAsProcessed(saveName, currentOptionsModTime)
             end
-            
+
             -- Start polling for new canisters (after existing ones are tracked)
             startPolling()
         end)
